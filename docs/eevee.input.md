@@ -9,13 +9,13 @@
 ### Collect
 - syntax
 ```c#
-eevee.inject.Collect(string inputName)
+eevee.input.Collect(string inputName)
 ```
 
 - example useage
 ```c#
 void Update() {
-    if (eevee.inject.Collect("left")){
+    if (eevee.input.Collect("left")){
         Debug.Log("left");
     }
 }
@@ -25,13 +25,13 @@ void Update() {
 ### Check
 - syntax
 ```c#
-eevee.inject.Check(string inputName)
+eevee.input.Check(string inputName)
 ```
 
 - example useage
 ```c#
 void Update() {
-    if (eevee.inject.Check("left")){
+    if (eevee.input.Check("left")){
         Debug.Log("left");
     }
 }
