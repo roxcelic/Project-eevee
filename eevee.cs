@@ -1,6 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -161,6 +165,9 @@ public class eev : MonoBehaviour {
     public Dictionary<string, eevee.config> FullConfig = new Dictionary<string, eevee.config>();
     public Dictionary<string, Coroutine> activeCoroutines = new Dictionary<string, Coroutine>();
 
+    public List<ButtonControl> current_pressed_buttons = new List<ButtonControl>();
+    public List<string> current_pressed_names = new List<string>();
+
     public bool Check(string input){
         if (FullConfig.ContainsKey(input)) {
             if (Input.GetKey((KeyCode)FullConfig[input].KEYBOARD_code) || IsControllerInputPressed(FullConfig[input].CONTROLLER_name)){
@@ -220,24 +227,18 @@ public class eev : MonoBehaviour {
         }
     }
 
-    // the ai void
-    //  i found this online but it feels very artaficially intelegent
-    bool IsControllerInputPressed(string inputName) {
-        if (inputName.EndsWith("+") || inputName.EndsWith("-")) {
-            string axisName = inputName.Substring(0, inputName.Length - 1); 
-            float axisValue = Input.GetAxis(axisName);
+    void FixedUpdate() {
+        if (Gamepad.current != null) {
 
-            if (inputName.EndsWith("+") && axisValue > 0.1f) return true;
-            if (inputName.EndsWith("-") && axisValue < -0.1f) return true;
-        } else {
-            if (Enum.TryParse(typeof(KeyCode), inputName, out object keyCode)) {
-                if (Input.GetKey((KeyCode)keyCode)) return true;
-            }
+            current_pressed_buttons = Gamepad.current.allControls.OfType<ButtonControl>()
+                .Where(control => control.isPressed)
+                .ToList();
 
-            float axisValue = Input.GetAxis(inputName);
-            if (Mathf.Abs(axisValue) > 0.1f) return true;
+            current_pressed_names = current_pressed_buttons.ConvertAll<string>(control => control.displayName);
         }
+    }
 
-        return false;
+    bool IsControllerInputPressed(string inputName) {
+        return current_pressed_names.Contains(inputName);
     }
 }
