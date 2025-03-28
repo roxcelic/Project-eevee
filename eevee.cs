@@ -90,6 +90,10 @@ namespace eevee {
         public static bool Check(string input) {
             return inject.retrieve().Check(input);
         }
+
+        public static int CheckAxis(string negative, string positive) {
+            return input.Check(positive)?1:input.Check(negative)?-1:0;
+        }
     }
 
     // config lock
