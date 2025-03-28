@@ -91,7 +91,7 @@ namespace eevee {
             return inject.retrieve().Check(input);
         }
 
-        public static int CheckAxis(string negative, string positive) {
+        public static int CheckAxis(string positive, string negative) {
             return input.Check(positive)?1:input.Check(negative)?-1:0;
         }
     }
