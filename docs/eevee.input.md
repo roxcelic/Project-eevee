@@ -4,6 +4,7 @@
 ## content
 - [eevee.input.Collect](#collect)
 - [eevee.input.Check](#check)
+- [eevee.input.CheckAxis]()
 ---
 
 ### Collect
@@ -38,3 +39,17 @@ void Update() {
 ```
 
 > will return if the input is pressed or not, no delay
+
+### CheckAxis
+- syntax
+```c#
+eevee.input.CheckAxis("right", "left");
+```
+
+- example useage
+```c#
+int Horizontal = eevee.input.Check("right")?1:eevee.input.Check("left")?-1:0;
+int Vertical = eevee.input.Check("up")?1:eevee.input.Check("down")?-1:0;
+```
+
+> returns an axis response to an input: 1 for positive; 0 for neutral; -1 for negative
