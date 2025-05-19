@@ -4,6 +4,7 @@
 ## content
 - [eevee.inject.install](#install)
 - [eevee.inject.add](#add)
+- [eevee.inject.OverWrite](#OverWrite)
 - [eevee.inject.parasite](#parasite)
 - [eevee.inject.retrieve](#retrieve)
 ---
@@ -76,6 +77,27 @@ void Start() {
 ```
 
 > This will add a single config to your config. This will also save
+
+### OverWrite
+- syntax
+```c#
+eevee.inject.OverWrite(eevee.config);
+```
+
+- example useage
+```c#
+public eevee.config config = new eevee.config {
+            displayName = "right",
+            KEYBOARD_code = (int)KeyCode.D,
+            CONTROLLER_name = "Left Stick Right"
+        };
+
+void Start() {
+    eevee.inject.add(config);
+}
+```
+
+> This does the same thing as add but i got confused with the naming :3
 
 ### Parasite
 - syntax

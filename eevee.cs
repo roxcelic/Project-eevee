@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace eevee {
     // variables
     public class var {
-        public static string name = "eevee-1.0.0";
+        public static string name = "eevee-1.0.5";
         public static string ConfPath = Path.Combine(Application.persistentDataPath, "EeveeConfig.json");
     }
     
@@ -42,6 +42,8 @@ namespace eevee {
 
     // livespace
     //  eevee.inject.install();
+    //  eevee.inject.add();
+    //  eevee.inject.OverWrite(); -- does the same thing as add but i got confused with the naming
     //  eevee.inject.Parasite();
     //  eevee.inject.retrieve(); -- returns the parasite
     public class inject {
@@ -60,6 +62,12 @@ namespace eevee {
             eevee.FullConfig[config.displayName] = config;
             Qlock.push();
         }
+
+        public static void OverWrite(eevee.config config) {
+            eev eevee = retrieve();
+            eevee.FullConfig[config.displayName] = config;
+            Qlock.push();
+        }
         
         public static void Parasite() {
             if (GameObject.Find(var.name) == null){
@@ -71,13 +79,24 @@ namespace eevee {
         }
 
         public static eev retrieve() {
-            eev eevee = GameObject.Find(var.name).GetComponent<eev>();
+            // make this make the object if null
+            GameObject eeveeOBJ = GameObject.Find(var.name);
+            if (eeveeOBJ == null){
+                inject.Parasite();
+                eeveeOBJ = GameObject.Find(var.name);
+            }
+
+            eev eevee = eeveeOBJ.GetComponent<eev>();
             return eevee;
         }
     }
 
     // inputs
     //  eevee.input.Collect("a");
+    //  eevee.input.Check("a");
+    //  eevee.input.Grab("a");
+    //  eevee.input.CheckAxis("a", "d");
+    //  eevee.input.CollectAxis("a", "d");
     public class input {
         static input() {
             inject.Parasite();
@@ -91,14 +110,30 @@ namespace eevee {
             return inject.retrieve().Check(input);
         }
 
+        public static bool Grab(string input) {
+            return inject.retrieve().Grab(input);
+        }
+
         public static int CheckAxis(string positive, string negative) {
             return input.Check(positive)?1:input.Check(negative)?-1:0;
+        }
+
+        public static int CollectAxis(string positive, string negative) {
+            return input.Collect(positive)?1:input.Collect(negative)?-1:0;
         }
     }
 
     // config lock
+    //  eevee.Qlock.wrap();
+    //  eevee.Qlock.unwrap();
     //  eevee.Qlock.push();
+    //  eevee.Qlock.extractr();
+    //  eevee.Qlock.clear();
     public class Qlock {
+        static Qlock() {
+            inject.Parasite();
+        }
+
         public static string wrap(Dictionary<string, eevee.config> FullConfig) {
             List<KeyValue> keyValueList = new List<KeyValue>();
 
@@ -126,7 +161,9 @@ namespace eevee {
         public static void push() {
             Dictionary<string, eevee.config> FullConfig = inject.retrieve().FullConfig;
 
+            Debug.Log("saving config...");
             File.WriteAllText(var.ConfPath, wrap(FullConfig));
+            Debug.Log("config saved.");
         }
 
         public static Dictionary<string, eevee.config> extractr() {
@@ -164,10 +201,17 @@ namespace eevee {
     }
 }
 
-// the componant for live data sifting
+// the componant for live data sifting,
+//  This is as Efficient as i could make it but feel free to try your hand at it, in basic how this works:
+//  Once an input is requested it will begin the track it, by every frame checking if it is held down either 
+//  by `UnityEngine.Input.GetKeyDown()` and by grabbing all the currently pressed buttons on the first gamepad (if there is a gamepad)
+//  and mapping that into a ~~hashtable~~ dictionary.
+// If anyone needs more help with editing this file please feel free to ask me personally through my socials, i will help out if i have the time (:
 public class eev : MonoBehaviour {
     public Dictionary<string, eevee.config> FullConfig = new Dictionary<string, eevee.config>();
     public Dictionary<string, Coroutine> activeCoroutines = new Dictionary<string, Coroutine>();
+
+    public Dictionary<string, Coroutine> activeCoroutines_grab = new Dictionary<string, Coroutine>();
 
     public List<ButtonControl> current_pressed_buttons = new List<ButtonControl>();
     public List<string> current_pressed_names = new List<string>();
@@ -179,6 +223,24 @@ public class eev : MonoBehaviour {
             } else {
                 return false;
             }
+        } else {
+            return false;
+        }
+    }
+
+    public bool Grab(string input){
+        if (FullConfig.ContainsKey(input)) {
+
+            if (activeCoroutines_grab.ContainsKey(input) && activeCoroutines_grab[input] != null){
+                return false;
+            } else if (Check(input)) {
+                activeCoroutines_grab[input] = StartCoroutine(Track_Grab(input));
+                
+                return true;
+            }
+
+            return false;
+
         } else {
             return false;
         }
@@ -228,6 +290,16 @@ public class eev : MonoBehaviour {
 
             delay = Mathf.Max(minDelay, delay / 2);
             yield return new WaitForSeconds(delay);
+        }
+    }
+
+    private IEnumerator Track_Grab(string keyName) {
+        while (true) {
+            if (!(Input.GetKey((KeyCode)FullConfig[keyName].KEYBOARD_code) || IsControllerInputPressed(FullConfig[keyName].CONTROLLER_name))) {
+                activeCoroutines_grab.Remove(keyName);
+                yield break;
+            }
+            yield return 0;
         }
     }
 

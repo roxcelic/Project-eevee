@@ -2,10 +2,36 @@
 ---
 
 ## content
+- [eevee.Qlock.wrap](#wrap)
+- [eevee.Qlock.unwrap](#unwrap)
 - [eevee.Qlock.push](#push)
-- [eevee.Qlock.clear](#clear)
 - [eevee.Qlock.extractr](#extractr)
+- [eevee.Qlock.clear](#clear)
 ---
+
+### wrap
+- syntax
+```c#
+eevee.Qlock.wrap(Dictionary<string, eevee.config> FullConfig);
+```
+
+- example useage
+```c#
+eevee.Qlock.wrap(FullConfig);
+```
+> turns the full config of eevee into json data, for interal processes such as writing to a file
+
+### unwrap
+- syntax
+```c#
+eevee.Qlock.unwrap(string json);
+```
+
+- example useage
+```c#
+eevee.Qlock.unwrap(FullConfig);
+```
+> turns the json data of the full config back into a c# data struct of eevee.config
 
 ### push
 - syntax
